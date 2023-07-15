@@ -2,6 +2,7 @@ package stevi.spring.beanpostprocessor;
 
 import lombok.SneakyThrows;
 import stevi.spring.anotations.Value;
+import stevi.spring.context.ApplicationContext;
 
 import java.net.URI;
 import java.nio.file.Files;
@@ -28,7 +29,7 @@ public class ValueAnnotationBeanPostProcessor implements BeanPostProcessor {
 
     @SneakyThrows
     @Override
-    public void postProcessAfterInitialization(Object object) {
+    public void postProcessAfterInitialization(Object object, ApplicationContext applicationContext) {
         Class<?> objectClass = object.getClass();
 
         for (var declaredField : objectClass.getDeclaredFields()) {

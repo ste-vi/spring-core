@@ -2,6 +2,7 @@ package stevi.spring.beanpostprocessor;
 
 import lombok.SneakyThrows;
 import stevi.spring.anotations.Autowired;
+import stevi.spring.context.ApplicationContext;
 import stevi.spring.factory.ObjectFactory;
 
 public class AutowiredAnnotationBeanPostProcessor implements BeanPostProcessor {
@@ -13,11 +14,11 @@ public class AutowiredAnnotationBeanPostProcessor implements BeanPostProcessor {
 
     @SneakyThrows
     @Override
-    public void postProcessAfterInitialization(Object object) {
+    public void postProcessAfterInitialization(Object object, ApplicationContext applicationContext) {
         for (var declaredField : object.getClass().getDeclaredFields()) {
             if (declaredField.isAnnotationPresent(Autowired.class)) {
+                Object autowiredObject = applicationContext.getObect(declaredField.getType());
                 declaredField.setAccessible(true);
-                Object autowiredObject = ObjectFactory.getInstance().createObject(declaredField.getType());
                 declaredField.set(object, autowiredObject);
             }
         }

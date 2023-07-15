@@ -1,9 +1,9 @@
 package stevi.spring.business;
 
-import lombok.NoArgsConstructor;
 import stevi.spring.anotations.Autowired;
+import stevi.spring.anotations.Component;
 
-@NoArgsConstructor
+@Component
 public class ExchangeApi {
 
     @Autowired

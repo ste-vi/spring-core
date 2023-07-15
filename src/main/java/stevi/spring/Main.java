@@ -1,12 +1,17 @@
 package stevi.spring;
 
 import stevi.spring.business.NotifierService;
-import stevi.spring.factory.ObjectFactory;
+import stevi.spring.context.Application;
+import stevi.spring.context.ApplicationContext;
+
+import java.util.Map;
 
 public class Main {
 
     public static void main(String[] args) {
-        NotifierService notifierService = ObjectFactory.getInstance().createObject(NotifierService.class);
+        ApplicationContext applicationContext = Application.run("stevi.spring", Map.of());
+
+        NotifierService notifierService = applicationContext.getObect(NotifierService.class);
         notifierService.sendExchangeNotification();
     }
 }
