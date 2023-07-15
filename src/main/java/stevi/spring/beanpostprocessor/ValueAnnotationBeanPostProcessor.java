@@ -1,4 +1,4 @@
-package stevi.spring;
+package stevi.spring.beanpostprocessor;
 
 import lombok.SneakyThrows;
 import stevi.spring.anotations.Value;
@@ -9,33 +9,29 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static java.util.stream.Collectors.toMap;
 
-public class ObjectFactory {
+public class ValueAnnotationBeanPostProcessor implements BeanPostProcessor {
 
-    private static final ObjectFactory instance = new ObjectFactory();
-    private final Config config;
+    private final Map<String, String> propertiesMap;
 
-    public static ObjectFactory getInstance() {
-        return instance;
+    public ValueAnnotationBeanPostProcessor() {
+        propertiesMap = fetchPropertiesIntoMap();
     }
 
-    private ObjectFactory() {
-        config = new DefaultConfig("stevi.spring", Map.of());
+    @Override
+    public void postProcessBeforeInitialization(Object object) {
+
     }
 
     @SneakyThrows
-    public <T> T createObject(Class<T> type) {
-        Class<? extends T> typeImpl = type;
-        if (typeImpl.isInterface()) {
-            typeImpl = config.getImplementation(type);
-        }
-        T object = typeImpl.getDeclaredConstructor().newInstance();
+    @Override
+    public void postProcessAfterInitialization(Object object) {
+        Class<?> objectClass = object.getClass();
 
-        Map<String, String> propertiesMap = getPropertiesMap(typeImpl);
-
-        for (var declaredField : typeImpl.getDeclaredFields()) {
+        for (var declaredField : objectClass.getDeclaredFields()) {
             Value valueAnnotation = declaredField.getAnnotation(Value.class);
             if (valueAnnotation != null) {
                 String value = valueAnnotation.value().isEmpty() ? propertiesMap.get(declaredField.getName()) : valueAnnotation.value();
@@ -43,13 +39,11 @@ public class ObjectFactory {
                 declaredField.set(object, value);
             }
         }
-
-        return object;
     }
 
     @SneakyThrows
-    private <T> Map<String, String> getPropertiesMap(Class<? extends T> typeImpl) {
-        URI uri = typeImpl.getClassLoader().getResource("application.properties").toURI();
+    private Map<String, String> fetchPropertiesIntoMap() {
+        URI uri = Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResource("application.properties")).toURI();
         Path path = Paths.get(uri);
         List<String> lines = Files.readAllLines(path);
         return lines.stream()

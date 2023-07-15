@@ -1,4 +1,4 @@
-package stevi.spring;
+package stevi.spring.business;
 
 public class EmailNotificationService {
 

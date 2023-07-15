@@ -1,12 +1,16 @@
-package stevi.spring;
+package stevi.spring.business;
 
 import lombok.NoArgsConstructor;
+import stevi.spring.anotations.Autowired;
 
 @NoArgsConstructor
 public class NotifierService {
 
-    private final ExchangeApi exchangeApi = ObjectFactory.getInstance().createObject(ExchangeApi.class);
-    private final EmailNotificationService emailNotificationService = ObjectFactory.getInstance().createObject(EmailNotificationService.class);
+    @Autowired
+    private ExchangeApi exchangeApi;
+
+    @Autowired
+    private EmailNotificationService emailNotificationService;
 
     public void sendExchangeNotification() {
         Double currentRate = exchangeApi.getCurrentRate();

@@ -1,11 +1,13 @@
-package stevi.spring;
+package stevi.spring.business;
 
 import lombok.NoArgsConstructor;
+import stevi.spring.anotations.Autowired;
 
 @NoArgsConstructor
 public class ExchangeApi {
 
-    private final ApiClient apiClient = ObjectFactory.getInstance().createObject(ApiClient.class);
+    @Autowired
+    private ApiClient apiClient;
 
     public Double getCurrentRate() {
         return apiClient.fetchExchangeRate();

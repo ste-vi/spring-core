@@ -1,11 +1,13 @@
-package stevi.spring;
+package stevi.spring.business;
 
 
+import stevi.spring.anotations.Component;
 import stevi.spring.anotations.Value;
 
+@Component
 public class ApiClient {
 
-    @Value(
+    @Value
     private String rate;
 
     public Double fetchExchangeRate() {
