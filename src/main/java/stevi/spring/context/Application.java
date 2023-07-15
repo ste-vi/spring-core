@@ -8,8 +8,8 @@ import java.util.Map;
 
 public class Application {
 
-    public static ApplicationContext run(String packageToScan, Map<Class, Class> ifcToImplMap) {
-        Config config = new DefaultConfig(packageToScan, ifcToImplMap);
+    public static ApplicationContext run(String packageToScan) {
+        Config config = new DefaultConfig(packageToScan);
         ApplicationContext applicationContext = new ApplicationContext(config);
         ObjectFactory objectFactory = new ObjectFactory(applicationContext);
         applicationContext.setObjectFactory(objectFactory);

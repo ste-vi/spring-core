@@ -9,7 +9,7 @@ import java.util.Map;
 public class Main {
 
     public static void main(String[] args) {
-        ApplicationContext applicationContext = Application.run("stevi.spring", Map.of());
+        ApplicationContext applicationContext = Application.run("stevi.spring");
 
         NotifierService notifierService = applicationContext.getObect(NotifierService.class);
         notifierService.sendExchangeNotification();
