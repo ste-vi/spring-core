@@ -16,9 +16,13 @@ public class ObjectFactory {
     private final ApplicationContext applicationContext;
     private final List<BeanPostProcessor> beanPostProcessors = new ArrayList<>();
 
-    @SneakyThrows
     public ObjectFactory(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
+        initBeanPostProcessors(applicationContext);
+    }
+
+    @SneakyThrows
+    private void initBeanPostProcessors(ApplicationContext applicationContext) {
         Reflections reflectionsScanner = applicationContext.getConfig().getReflectionsScanner();
         for (Class<? extends BeanPostProcessor> aClass : reflectionsScanner.getSubTypesOf(BeanPostProcessor.class)) {
             beanPostProcessors.add(aClass.getDeclaredConstructor().newInstance());

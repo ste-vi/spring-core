@@ -29,15 +29,26 @@ public class ApplicationContext {
         if (cache.containsKey(aClass)) {
             return (T) cache.get(aClass);
         }
+
+        Class<? extends T> implClass = getImplementationClassIfNeeded(aClass);
+        T object = objectFactory.createObject(implClass);
+        putObjectIntoCache(aClass, implClass, object);
+
+        return object;
+    }
+
+    private <T> Class<? extends T> getImplementationClassIfNeeded(Class<T> aClass) {
         Class<? extends T> implClass = aClass;
         if (implClass.isInterface()) {
             implClass = config.getImplementation(aClass);
         }
-        T object = objectFactory.createObject(implClass);
+        return implClass;
+    }
+
+    private <T> void putObjectIntoCache(Class<T> aClass, Class<? extends T> implClass, T object) {
         if (implClass.isAnnotationPresent(Component.class) || implClass.isAnnotationPresent(Service.class)) {
             cache.put(aClass, object);
         }
-        return object;
     }
 
 }

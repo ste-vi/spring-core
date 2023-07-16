@@ -4,8 +4,6 @@ import stevi.spring.config.Config;
 import stevi.spring.config.DefaultConfig;
 import stevi.spring.factory.ObjectFactory;
 
-import java.util.Map;
-
 public class Application {
 
     public static ApplicationContext run(String packageToScan) {
