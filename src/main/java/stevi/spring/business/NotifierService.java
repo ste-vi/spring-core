@@ -9,8 +9,11 @@ public class NotifierService {
     @Autowired
     private ExchangeApi exchangeApi;
 
-    @Autowired
-    private EmailNotificationService emailNotificationService;
+    private final EmailNotificationService emailNotificationService;
+
+    public NotifierService(EmailNotificationService emailNotificationService) {
+        this.emailNotificationService = emailNotificationService;
+    }
 
     public void sendExchangeNotification() {
         Double currentRate = exchangeApi.getCurrentRate();

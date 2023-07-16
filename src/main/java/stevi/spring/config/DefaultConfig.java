@@ -27,7 +27,7 @@ public class DefaultConfig implements Config {
         if (implementations.size() == 1) {
             return implementations.iterator().next();
         } else if (implementations.isEmpty()) {
-            throw new RuntimeException("No implementations find for the interface %s".formatted(interfaceType.getName()));
+            throw new RuntimeException("No implementations found for the interface %s".formatted(interfaceType.getName()));
         } else {
             return getPrimaryImplementation(interfaceType, implementations);
         }
@@ -54,6 +54,7 @@ public class DefaultConfig implements Config {
 
     /**
      * Gets an implementations of an interface by a simple class name.
+     * Used for {{@link stevi.spring.anotations.Qualifier annotation}}
      */
     @Override
     public <T> Class<? extends T> getImplementationByBeanName(Class<T> interfaceType, String beanName) {

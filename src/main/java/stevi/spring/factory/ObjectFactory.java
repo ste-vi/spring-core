@@ -6,10 +6,14 @@ import stevi.spring.anotations.PostConstruct;
 import stevi.spring.beanpostprocessor.BeanPostProcessor;
 import stevi.spring.context.ApplicationContext;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public class ObjectFactory {
 
@@ -38,7 +42,32 @@ public class ObjectFactory {
         return object;
     }
 
-    private static <T> T create(Class<T> implClass) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+    @SneakyThrows
+    private <T> T create(Class<T> implClass) {
+        return Arrays.stream(implClass.getDeclaredConstructors())
+                .filter(constructor -> constructor.getParameterCount() > 0)
+                .findFirst()
+                .map(constructor -> instantiateConstructorWithParameters(implClass, constructor))
+                .orElseGet(() -> instantiateDefaultConstructor(implClass));
+
+    }
+
+    @SneakyThrows
+    private <T> T instantiateConstructorWithParameters(Class<T> implClass, Constructor<?> constructor) {
+        List<?> instantiatedParameters = Arrays.stream(constructor.getParameterTypes())
+                .filter(type -> !type.isPrimitive() && !type.isAssignableFrom(Collection.class) && !type.isAssignableFrom(Map.class))
+                .map(applicationContext::getObect)
+                .toList();
+
+        if (constructor.getParameterCount() != instantiatedParameters.size()) {
+            throw new RuntimeException("Cannot inject beans via constructor of class %s. Not all constructor parameters are beans".formatted(implClass.getName()));
+        }
+
+        return (T) constructor.newInstance(instantiatedParameters.toArray());
+    }
+
+    @SneakyThrows
+    private <T> T instantiateDefaultConstructor(Class<T> implClass) {
         return implClass.getDeclaredConstructor().newInstance();
     }
 
