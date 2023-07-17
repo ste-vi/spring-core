@@ -35,6 +35,7 @@ public class ApplicationContext {
 
     private void createEagerBeans() {
         createConfigurationBeans();
+        createComponentBeans();
     }
 
     private void createConfigurationBeans() {
@@ -54,6 +55,12 @@ public class ApplicationContext {
                         }
                     }
                 });
+    }
+
+    private void createComponentBeans() {
+        Set<Class<?>> annotatedClasses = config.getReflectionsScanner().getTypesAnnotatedWith(Component.class);
+        annotatedClasses.addAll(config.getReflectionsScanner().getTypesAnnotatedWith(Service.class));
+        annotatedClasses.forEach(this::getBean);
     }
 
     public <T> T getBeanByName(String beanName) {
