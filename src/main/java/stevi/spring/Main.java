@@ -9,7 +9,7 @@ public class Main {
     public static void main(String[] args) {
         ApplicationContext applicationContext = Application.run("stevi.spring");
 
-        NotifierService notifierService = applicationContext.getObect(NotifierService.class);
+        NotifierService notifierService = applicationContext.getBean(NotifierService.class);
         notifierService.sendExchangeNotification();
 
         Application.applicationFixedExecutorService.shutdown();

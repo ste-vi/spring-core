@@ -16,6 +16,7 @@ public class Application {
         ApplicationContext applicationContext = new ApplicationContext(config);
         ObjectFactory objectFactory = new ObjectFactory(applicationContext);
         applicationContext.setObjectFactory(objectFactory);
+        applicationContext.postInit();
 
         applicationFixedExecutorService = Executors.newFixedThreadPool(10);
 

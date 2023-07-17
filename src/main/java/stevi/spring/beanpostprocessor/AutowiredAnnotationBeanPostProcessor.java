@@ -23,7 +23,7 @@ public class AutowiredAnnotationBeanPostProcessor implements BeanPostProcessor {
 
                 type = getQualifiedImplementationIfNeeded(applicationContext, declaredField, type);
 
-                Object autowiredObject = applicationContext.getObect(type);
+                Object autowiredObject = applicationContext.getBean(type);
                 declaredField.setAccessible(true);
                 declaredField.set(object, autowiredObject);
             }

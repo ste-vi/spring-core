@@ -62,7 +62,7 @@ public class ObjectFactory {
     private <T> T instantiateConstructorWithParameters(Class<T> implClass, Constructor<?> constructor) {
         List<?> instantiatedParameters = Arrays.stream(constructor.getParameterTypes())
                 .filter(type -> !type.isPrimitive() && !type.isAssignableFrom(Collection.class) && !type.isAssignableFrom(Map.class))
-                .map(applicationContext::getObect)
+                .map(applicationContext::getBean)
                 .toList();
 
         if (constructor.getParameterCount() != instantiatedParameters.size()) {

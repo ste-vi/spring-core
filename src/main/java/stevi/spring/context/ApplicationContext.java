@@ -2,12 +2,16 @@ package stevi.spring.context;
 
 import lombok.Getter;
 import lombok.Setter;
+import stevi.spring.anotations.Bean;
 import stevi.spring.anotations.Component;
+import stevi.spring.anotations.Configuration;
 import stevi.spring.anotations.Service;
 import stevi.spring.config.Config;
 import stevi.spring.factory.ObjectFactory;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ApplicationContext {
@@ -16,7 +20,7 @@ public class ApplicationContext {
     private ObjectFactory objectFactory;
 
     @Getter
-    private final Map<Class, Object> cache = new ConcurrentHashMap<>();
+    private final Map<String, Object> cache = new ConcurrentHashMap<>();
 
     @Getter
     private final Config config;
@@ -25,9 +29,45 @@ public class ApplicationContext {
         this.config = config;
     }
 
-    public <T> T getObect(Class<T> aClass) {
-        if (cache.containsKey(aClass)) {
-            return (T) cache.get(aClass);
+    public void postInit() {
+        createEagerBeans();
+    }
+
+    private void createEagerBeans() {
+        createConfigurationBeans();
+    }
+
+    private void createConfigurationBeans() {
+        Set<Class<?>> classesAnnotatedWithConfiguration = config.getReflectionsScanner().getTypesAnnotatedWith(Configuration.class);
+        classesAnnotatedWithConfiguration.stream()
+                .filter(configClass -> !configClass.isInterface())
+                .map(this::getBean)
+                .forEach(configBean -> {
+                    for (var declaredMethod : configBean.getClass().getDeclaredMethods()) {
+                        if (declaredMethod.isAnnotationPresent(Bean.class)) {
+                            try {
+                                Object createdBean = declaredMethod.invoke(configBean);
+                                cache.put(declaredMethod.getName(), createdBean);
+                            } catch (IllegalAccessException | InvocationTargetException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                    }
+                });
+    }
+
+    public <T> T getBeanByName(String beanName) {
+        if (cache.containsKey(beanName)) {
+            return (T) cache.get(beanName);
+        } else {
+            throw new RuntimeException("No bean found with provided name: %s".formatted(beanName));
+        }
+    }
+
+    public <T> T getBean(Class<T> aClass) {
+        String beanName = getBeanNameFromClass(aClass);
+        if (cache.containsKey(beanName)) {
+            return (T) cache.get(beanName);
         }
 
         Class<? extends T> implClass = getImplementationClassIfNeeded(aClass);
@@ -47,8 +87,16 @@ public class ApplicationContext {
 
     private <T> void putObjectIntoCache(Class<T> aClass, Class<? extends T> implClass, T object) {
         if (implClass.isAnnotationPresent(Component.class) || implClass.isAnnotationPresent(Service.class)) {
-            cache.put(aClass, object);
+            cache.put(aClass.getSimpleName(), object);
         }
     }
 
+    private <T> String getBeanNameFromClass(Class<T> aClass) {
+        String classSimpleName = aClass.getSimpleName();
+        return formatBeanName(classSimpleName);
+    }
+
+    private String formatBeanName(String beanName) {
+        return beanName.substring(0, 1).toLowerCase() + beanName.substring(1);
+    }
 }

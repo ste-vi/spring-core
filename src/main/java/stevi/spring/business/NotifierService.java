@@ -9,6 +9,9 @@ public class NotifierService {
     @Autowired
     private ExchangeApi exchangeApi;
 
+    @Autowired
+    private BeanToCheckViaBeanAnnotation beanToCheckViaBeanAnnotation;
+
     private final EmailNotificationService emailNotificationService;
 
     public NotifierService(EmailNotificationService emailNotificationService) {
@@ -18,5 +21,6 @@ public class NotifierService {
     public void sendExchangeNotification() {
         Double currentRate = exchangeApi.getCurrentRate();
         emailNotificationService.notifyUser(1L, "Hey bro! here is the exchange rate for today: %s UA grivna per US dollar".formatted(currentRate));
+        beanToCheckViaBeanAnnotation.someMethod();
     }
 }
