@@ -11,5 +11,7 @@ public class Main {
 
         NotifierService notifierService = applicationContext.getObect(NotifierService.class);
         notifierService.sendExchangeNotification();
+
+        Application.applicationFixedExecutorService.shutdown();
     }
 }

@@ -3,6 +3,7 @@ package stevi.spring.factory;
 import lombok.SneakyThrows;
 import org.reflections.Reflections;
 import stevi.spring.anotations.PostConstruct;
+import stevi.spring.aop.ProxyProcessor;
 import stevi.spring.beanpostprocessor.BeanPostProcessor;
 import stevi.spring.context.ApplicationContext;
 
@@ -19,6 +20,7 @@ public class ObjectFactory {
 
     private final ApplicationContext applicationContext;
     private final List<BeanPostProcessor> beanPostProcessors = new ArrayList<>();
+    private final List<ProxyProcessor> proxyProcessors = new ArrayList<>();
 
     public ObjectFactory(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
@@ -31,6 +33,9 @@ public class ObjectFactory {
         for (Class<? extends BeanPostProcessor> aClass : reflectionsScanner.getSubTypesOf(BeanPostProcessor.class)) {
             beanPostProcessors.add(aClass.getDeclaredConstructor().newInstance());
         }
+        for (Class<? extends ProxyProcessor> aClass : reflectionsScanner.getSubTypesOf(ProxyProcessor.class)) {
+            proxyProcessors.add(aClass.getDeclaredConstructor().newInstance());
+        }
     }
 
     @SneakyThrows
@@ -38,6 +43,7 @@ public class ObjectFactory {
         T object = create(implClass);
         configure(object);
         invokeInit(object);
+        object = wrapWithProxy(implClass, object);
 
         return object;
     }
@@ -82,6 +88,13 @@ public class ObjectFactory {
                 declaredMethod.invoke(object);
             }
         }
+    }
+
+    private <T> T wrapWithProxy(Class<T> implClass, T object) {
+        for (ProxyProcessor proxyProcessor : proxyProcessors) {
+            object = (T) proxyProcessor.replaceWithProxy(object, implClass);
+        }
+        return object;
     }
 
 }

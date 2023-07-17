@@ -4,7 +4,12 @@ import stevi.spring.config.Config;
 import stevi.spring.config.DefaultConfig;
 import stevi.spring.factory.ObjectFactory;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public class Application {
+
+    public static ExecutorService applicationFixedExecutorService;
 
     public static ApplicationContext run(String packageToScan) {
         Config config = new DefaultConfig(packageToScan);
@@ -12,7 +17,8 @@ public class Application {
         ObjectFactory objectFactory = new ObjectFactory(applicationContext);
         applicationContext.setObjectFactory(objectFactory);
 
-        //todo: inti all not lazy singletons
+        applicationFixedExecutorService = Executors.newFixedThreadPool(10);
+
         return applicationContext;
     }
 }
