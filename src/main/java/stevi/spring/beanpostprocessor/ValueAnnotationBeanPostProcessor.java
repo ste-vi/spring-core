@@ -3,52 +3,50 @@ package stevi.spring.beanpostprocessor;
 import lombok.SneakyThrows;
 import stevi.spring.anotations.Value;
 import stevi.spring.context.ApplicationContext;
+import stevi.spring.util.PropertyUtils;
 
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-
-import static java.util.stream.Collectors.toMap;
+import java.util.Optional;
 
 public class ValueAnnotationBeanPostProcessor implements BeanPostProcessor {
 
     private final Map<String, String> propertiesMap;
 
     public ValueAnnotationBeanPostProcessor() {
-        propertiesMap = fetchPropertiesIntoMap();
-    }
+        propertiesMap = PropertyUtils.fetchProperties("application.properties");
 
-    @Override
-    public void postProcessBeforeInitialization(Object object) {
+        Optional<String> activeProfile = propertiesMap
+                .entrySet()
+                .stream()
+                .filter(entry -> entry.getKey().trim().equals("spring.profile.active"))
+                .findFirst()
+                .map(Map.Entry::getValue)
+                .map(String::trim);
+
+        if (activeProfile.isPresent()) {
+            Map<String, String> defaultProfileProperties = PropertyUtils.fetchProperties("application-%s.properties".formatted(activeProfile.get()));
+            propertiesMap.putAll(defaultProfileProperties);
+        }
 
     }
 
     @SneakyThrows
     @Override
-    public void postProcessAfterInitialization(Object object, ApplicationContext applicationContext) {
-        Class<?> objectClass = object.getClass();
+    public void postProcessBeforeInitialization(Object bean, ApplicationContext applicationContext) {
+        Class<?> objectClass = bean.getClass();
 
         for (var declaredField : objectClass.getDeclaredFields()) {
             Value valueAnnotation = declaredField.getAnnotation(Value.class);
             if (valueAnnotation != null) {
                 String value = valueAnnotation.value().isEmpty() ? propertiesMap.get(declaredField.getName()) : valueAnnotation.value();
                 declaredField.setAccessible(true);
-                declaredField.set(object, value);
+                declaredField.set(bean, value);
             }
         }
     }
 
-    @SneakyThrows
-    private Map<String, String> fetchPropertiesIntoMap() {
-        URI uri = Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResource("application.properties")).toURI();
-        Path path = Paths.get(uri);
-        List<String> lines = Files.readAllLines(path);
-        return lines.stream()
-                .map(line -> line.trim().split("="))
-                .collect(toMap(array -> array[0], array -> array[1]));
+    @Override
+    public void postProcessAfterInitialization(Object bean, ApplicationContext applicationContext) {
+
     }
 }

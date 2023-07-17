@@ -13,7 +13,7 @@ public class Application {
 
     public static ApplicationContext run(String packageToScan) {
         Config config = new DefaultConfig(packageToScan);
-        ApplicationContext applicationContext = new ApplicationContext(config);
+        AutowiredApplicationContext applicationContext = new AutowiredApplicationContext(config);
         ObjectFactory objectFactory = new ObjectFactory(applicationContext);
         applicationContext.setObjectFactory(objectFactory);
         applicationContext.postInit();

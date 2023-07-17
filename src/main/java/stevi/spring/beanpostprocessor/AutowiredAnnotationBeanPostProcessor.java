@@ -9,14 +9,9 @@ import java.lang.reflect.Field;
 
 public class AutowiredAnnotationBeanPostProcessor implements BeanPostProcessor {
 
-    @Override
-    public void postProcessBeforeInitialization(Object object) {
-
-    }
-
     @SneakyThrows
     @Override
-    public void postProcessAfterInitialization(Object object, ApplicationContext applicationContext) {
+    public void postProcessBeforeInitialization(Object object, ApplicationContext applicationContext) {
         for (var declaredField : object.getClass().getDeclaredFields()) {
             if (declaredField.isAnnotationPresent(Autowired.class)) {
                 Class<?> type = declaredField.getType();
@@ -28,6 +23,11 @@ public class AutowiredAnnotationBeanPostProcessor implements BeanPostProcessor {
                 declaredField.set(object, autowiredObject);
             }
         }
+    }
+
+    @Override
+    public void postProcessAfterInitialization(Object object, ApplicationContext applicationContext) {
+
     }
 
     private Class<?> getQualifiedImplementationIfNeeded(ApplicationContext applicationContext, Field declaredField, Class<?> type) {

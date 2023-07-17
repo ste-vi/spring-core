@@ -42,7 +42,6 @@ public class ObjectFactory {
     public <T> T createObject(Class<T> implClass) {
         T object = create(implClass);
         configure(object);
-        invokeInit(object);
         object = wrapWithProxy(implClass, object);
 
         return object;
@@ -78,11 +77,13 @@ public class ObjectFactory {
     }
 
     private <T> void configure(T object) {
-        beanPostProcessors.forEach(beanPostProcessor -> beanPostProcessor.postProcessBeforeInitialization(object));
+        beanPostProcessors.forEach(beanPostProcessor -> beanPostProcessor.postProcessBeforeInitialization(object, applicationContext));
+        invokeInit(object);
         beanPostProcessors.forEach(beanPostProcessor -> beanPostProcessor.postProcessAfterInitialization(object, applicationContext));
     }
 
-    private <T> void invokeInit(T object) throws IllegalAccessException, InvocationTargetException {
+    @SneakyThrows
+    private <T> void invokeInit(T object) {
         for (Method declaredMethod : object.getClass().getDeclaredMethods()) {
             if (declaredMethod.isAnnotationPresent(PostConstruct.class)) {
                 declaredMethod.invoke(object);

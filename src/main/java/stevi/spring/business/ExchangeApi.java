@@ -8,7 +8,7 @@ import stevi.spring.anotations.Qualifier;
 public class ExchangeApi {
 
     @Autowired
-    @Qualifier(beanName = "AsyncApiClient")
+    @Qualifier(beanName = "HttpApiClient")
     private ApiClient apiClient;
 
     public Double getCurrentRate() {
