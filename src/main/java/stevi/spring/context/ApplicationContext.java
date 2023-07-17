@@ -5,6 +5,7 @@ import lombok.Setter;
 import stevi.spring.anotations.Bean;
 import stevi.spring.anotations.Component;
 import stevi.spring.anotations.Configuration;
+import stevi.spring.anotations.Lazy;
 import stevi.spring.anotations.Service;
 import stevi.spring.config.Config;
 import stevi.spring.factory.ObjectFactory;
@@ -60,7 +61,9 @@ public class ApplicationContext {
     private void createComponentBeans() {
         Set<Class<?>> annotatedClasses = config.getReflectionsScanner().getTypesAnnotatedWith(Component.class);
         annotatedClasses.addAll(config.getReflectionsScanner().getTypesAnnotatedWith(Service.class));
-        annotatedClasses.forEach(this::getBean);
+        annotatedClasses.stream()
+                .filter(aClass -> !aClass.isAnnotationPresent(Lazy.class))
+                .forEach(this::getBean);
     }
 
     public <T> T getBeanByName(String beanName) {
