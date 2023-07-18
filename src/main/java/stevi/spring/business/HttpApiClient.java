@@ -1,10 +1,10 @@
 package stevi.spring.business;
 
 
-import stevi.spring.anotations.Component;
-import stevi.spring.anotations.PostConstruct;
-import stevi.spring.anotations.Primary;
-import stevi.spring.anotations.Value;
+import stevi.spring.core.anotations.Component;
+import stevi.spring.core.anotations.PostConstruct;
+import stevi.spring.core.anotations.Primary;
+import stevi.spring.core.anotations.Value;
 
 @Primary
 @Component

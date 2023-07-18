@@ -1,6 +1,6 @@
 package stevi.spring.business;
 
-import stevi.spring.anotations.Service;
+import stevi.spring.core.anotations.Service;
 
 @Service
 public class EmailNotificationService {

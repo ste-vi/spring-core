@@ -1,8 +1,8 @@
 package stevi.spring;
 
 import stevi.spring.business.NotifierService;
-import stevi.spring.context.Application;
-import stevi.spring.context.ApplicationContext;
+import stevi.spring.core.context.Application;
+import stevi.spring.core.context.ApplicationContext;
 
 public class Main {
 

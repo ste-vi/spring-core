@@ -1,8 +1,8 @@
 package stevi.spring.business;
 
-import stevi.spring.anotations.Autowired;
-import stevi.spring.anotations.Component;
-import stevi.spring.anotations.Qualifier;
+import stevi.spring.core.anotations.Autowired;
+import stevi.spring.core.anotations.Component;
+import stevi.spring.core.anotations.Qualifier;
 
 @Component
 public class ExchangeApi {

@@ -1,8 +1,8 @@
 package stevi.spring.business;
 
-import stevi.spring.anotations.Bean;
-import stevi.spring.anotations.Configuration;
-import stevi.spring.anotations.Value;
+import stevi.spring.core.anotations.Bean;
+import stevi.spring.core.anotations.Configuration;
+import stevi.spring.core.anotations.Value;
 
 @Configuration
 public class Config {

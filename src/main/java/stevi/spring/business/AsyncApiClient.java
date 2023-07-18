@@ -1,6 +1,6 @@
 package stevi.spring.business;
 
-import stevi.spring.anotations.Component;
+import stevi.spring.core.anotations.Component;
 
 @Component
 public class AsyncApiClient implements ApiClient {
