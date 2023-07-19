@@ -25,7 +25,6 @@ public class NotifierService {
     }
 
     public void sendExchangeNotification() {
-        log.info("Active environment: {}", environment.getActiveProfile());
         log.info(Thread.currentThread().getName());
         Double currentRate = exchangeApi.getCurrentRate();
         emailNotificationService.notifyUser(1L, "Hey bro! here is the exchange rate for today: %s UA grivna per US dollar".formatted(currentRate));

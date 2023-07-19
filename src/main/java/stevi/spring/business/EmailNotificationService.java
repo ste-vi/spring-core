@@ -20,7 +20,6 @@ public class EmailNotificationService {
 
     @Async
     public void notifyUser(Long userId, String message) {
-        log.info(this.getClass().getName());
         log.info(Thread.currentThread().getName());
         System.out.printf("New notification is here for userId %s : %s%n", userId, message);
         beanToCheckViaBeanAnnotation.testAsyncFromAnotherAsync();

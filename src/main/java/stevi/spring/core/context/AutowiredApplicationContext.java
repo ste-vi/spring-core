@@ -8,14 +8,12 @@ import stevi.spring.core.anotations.Configuration;
 import stevi.spring.core.anotations.Lazy;
 import stevi.spring.core.anotations.Service;
 import stevi.spring.core.config.Config;
-import stevi.spring.core.context.util.BeanNameUtils;
+import stevi.spring.core.env.ApplicationEnvironment;
 import stevi.spring.core.env.Environment;
 import stevi.spring.core.factory.BeanFactory;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Implementation of {@link ApplicationContext}
@@ -28,10 +26,11 @@ public class AutowiredApplicationContext implements ApplicationContext {
     @Getter
     private final Config config;
 
-    private final Map<String, Object> cache = new ConcurrentHashMap<>();
+    private final BeanCache beanCache;
 
     public AutowiredApplicationContext(Config config) {
         this.config = config;
+        this.beanCache = new BeanCache();
     }
 
     /**
@@ -45,7 +44,8 @@ public class AutowiredApplicationContext implements ApplicationContext {
     }
 
     private void createApplicationEnvironment() {
-        getBean(Environment.class);
+        ApplicationEnvironment environment = new ApplicationEnvironment();
+        beanCache.put(environment);
     }
 
     private void createConfigurationBeans() {
@@ -58,7 +58,7 @@ public class AutowiredApplicationContext implements ApplicationContext {
                         if (declaredMethod.isAnnotationPresent(Bean.class)) {
                             try {
                                 Object createdBean = declaredMethod.invoke(configBean);
-                                cache.put(declaredMethod.getName(), createdBean);
+                                beanCache.put(declaredMethod.getName(), createdBean);
                             } catch (IllegalAccessException | InvocationTargetException e) {
                                 throw new RuntimeException(e);
                             }
@@ -81,8 +81,8 @@ public class AutowiredApplicationContext implements ApplicationContext {
      */
     @Override
     public <T> T getBeanByName(String beanName) {
-        if (cache.containsKey(beanName)) {
-            return (T) cache.get(beanName);
+        if (beanCache.contains(beanName)) {
+            return (T) beanCache.get(beanName);
         } else {
             throw new RuntimeException("No bean found with provided name: %s".formatted(beanName));
         }
@@ -96,14 +96,13 @@ public class AutowiredApplicationContext implements ApplicationContext {
      */
     @Override
     public <T> T getBean(Class<T> aClass) {
-        String beanName = BeanNameUtils.getBeanNameFromClass(aClass);
-        if (cache.containsKey(beanName)) {
-            return (T) cache.get(beanName);
+        Class<? extends T> implClass = getImplementationClass(aClass);
+        if (beanCache.contains(implClass)) {
+            return (T) beanCache.get(implClass);
         }
 
-        Class<? extends T> implClass = getImplementationClass(aClass);
         T object = beanFactory.createBean(implClass);
-        putObjectIntoCache(aClass, implClass, object);
+        putObjectIntoCache(implClass, object);
 
         return object;
     }
@@ -116,9 +115,9 @@ public class AutowiredApplicationContext implements ApplicationContext {
         return implClass;
     }
 
-    private <T> void putObjectIntoCache(Class<T> aClass, Class<? extends T> implClass, T object) {
+    private <T> void putObjectIntoCache(Class<? extends T> implClass, T object) {
         if (implClass.isAnnotationPresent(Component.class) || implClass.isAnnotationPresent(Service.class)) {
-            cache.put(aClass.getSimpleName(), object);
+            beanCache.put(object);
         }
     }
 }

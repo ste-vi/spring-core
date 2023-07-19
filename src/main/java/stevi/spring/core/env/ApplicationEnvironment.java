@@ -1,5 +1,6 @@
 package stevi.spring.core.env;
 
+import lombok.extern.slf4j.Slf4j;
 import stevi.spring.core.anotations.Component;
 import stevi.spring.core.env.util.PropertyUtils;
 
@@ -11,41 +12,51 @@ import java.util.Optional;
  * Actual implementation of {@link Environment}.
  * Hols the profile and the property map of the current application.
  */
+@Slf4j
 @Component
 public class ApplicationEnvironment implements Environment {
 
     private final Map<String, String> propertiesMap = new HashMap<>();
-    private String activeProfile = "";
+    private String activeProfile;
 
     public ApplicationEnvironment() {
         readApplicationProperties();
-        Optional<String> profile = fetchActiveProfile();
-
-        if (profile.isPresent()) {
-            activeProfile = profile.get();
-            Map<String, String> activeProfileProperties = PropertyUtils.fetchProperties(CUSTOM_ENV_APPLICATION_PROPERTIES_FILE.formatted(profile.get()));
-            propertiesMap.putAll(activeProfileProperties);
-        }
+        initActiveProfile();
+        fetchActiveProfileProperties();
     }
 
     private void readApplicationProperties() {
         propertiesMap.putAll(PropertyUtils.fetchProperties(APPLICATION_PROPERTIES_FILE));
     }
 
-    private Optional<String> fetchActiveProfile() {
+    private void initActiveProfile() {
         Optional<String> profile = Optional.ofNullable(System.getenv(ACTIVE_PROFILE_SYSTEM_PROPERTY_NAME));
-        if (profile.isEmpty()) {
-            profile = propertiesMap
-                    .entrySet()
-                    .stream()
-                    .filter(entry -> !entry.getKey().isEmpty())
-                    .filter(entry -> ACTIVE_PROFILE_APPLICATION_PROPERTY_NAME.equals(entry.getKey().trim()))
-                    .findFirst()
-                    .map(Map.Entry::getValue)
-                    .filter(value -> !value.isEmpty())
-                    .map(String::trim);
+        if (profile.isPresent()) {
+            activeProfile = profile.get();
+        } else {
+            profile = fetchActiveProfileFromProperties();
+            profile.ifPresent(foundProfile -> activeProfile = foundProfile);
         }
-        return profile;
+        log.info("Active profile set is {}", activeProfile);
+    }
+
+    private Optional<String> fetchActiveProfileFromProperties() {
+        return propertiesMap
+                .entrySet()
+                .stream()
+                .filter(entry -> !entry.getKey().isEmpty())
+                .filter(entry -> ACTIVE_PROFILE_APPLICATION_PROPERTY_NAME.equals(entry.getKey().trim()))
+                .findFirst()
+                .map(Map.Entry::getValue)
+                .filter(value -> !value.isEmpty())
+                .map(String::trim);
+    }
+
+    private void fetchActiveProfileProperties() {
+        if (activeProfile != null) {
+            Map<String, String> activeProfileProperties = PropertyUtils.fetchProperties(CUSTOM_ENV_APPLICATION_PROPERTIES_FILE.formatted(activeProfile));
+            propertiesMap.putAll(activeProfileProperties);
+        }
     }
 
     /**

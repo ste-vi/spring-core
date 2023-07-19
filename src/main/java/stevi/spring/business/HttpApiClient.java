@@ -1,11 +1,13 @@
 package stevi.spring.business;
 
 
+import lombok.extern.slf4j.Slf4j;
 import stevi.spring.core.anotations.Component;
 import stevi.spring.core.anotations.PostConstruct;
 import stevi.spring.core.anotations.Primary;
 import stevi.spring.core.anotations.Value;
 
+@Slf4j
 @Primary
 @Component
 public class HttpApiClient implements ApiClient {
