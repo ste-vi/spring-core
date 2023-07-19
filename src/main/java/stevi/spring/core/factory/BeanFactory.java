@@ -3,9 +3,9 @@ package stevi.spring.core.factory;
 import lombok.SneakyThrows;
 import org.reflections.Reflections;
 import stevi.spring.core.anotations.PostConstruct;
-import stevi.spring.core.aop.ProxyProcessor;
 import stevi.spring.core.beanpostprocessor.BeanPostProcessor;
 import stevi.spring.core.context.ApplicationContext;
+import stevi.spring.core.proxy.ProxyProcessor;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -15,19 +15,22 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public class ObjectFactory {
+/**
+ * Class which responsible for creating bean objects and configuring them.
+ */
+public class BeanFactory {
 
     private final ApplicationContext applicationContext;
     private final List<BeanPostProcessor> beanPostProcessors = new ArrayList<>();
     private final List<ProxyProcessor> proxyProcessors = new ArrayList<>();
 
-    public ObjectFactory(ApplicationContext applicationContext) {
+    public BeanFactory(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
-        initBeanPostProcessors(applicationContext);
+        initProcessors(applicationContext);
     }
 
     @SneakyThrows
-    private void initBeanPostProcessors(ApplicationContext applicationContext) {
+    private void initProcessors(ApplicationContext applicationContext) {
         Reflections reflectionsScanner = applicationContext.getConfig().getReflectionsScanner();
         for (Class<? extends BeanPostProcessor> aClass : reflectionsScanner.getSubTypesOf(BeanPostProcessor.class)) {
             beanPostProcessors.add(aClass.getDeclaredConstructor().newInstance());
@@ -37,13 +40,18 @@ public class ObjectFactory {
         }
     }
 
+    /**
+     * Creates bean based on given class.
+     *
+     * @return ready bean object
+     */
     @SneakyThrows
-    public <T> T createObject(Class<T> implClass) {
-        T object = create(implClass);
-        configure(object);
-        object = wrapWithProxy(implClass, object);
+    public <T> T createBean(Class<T> implClass) {
+        T bean = create(implClass);
+        configure(bean);
+        bean = wrapWithProxy(bean, implClass);
 
-        return object;
+        return bean;
     }
 
     @SneakyThrows
@@ -75,26 +83,27 @@ public class ObjectFactory {
         return implClass.getDeclaredConstructor().newInstance();
     }
 
-    private <T> void configure(T object) {
-        beanPostProcessors.forEach(beanPostProcessor -> beanPostProcessor.postProcessBeforeInitialization(object, applicationContext));
-        invokeInit(object);
-        beanPostProcessors.forEach(beanPostProcessor -> beanPostProcessor.postProcessAfterInitialization(object, applicationContext));
+    private <T> void configure(T bean) {
+        beanPostProcessors.forEach(beanPostProcessor -> beanPostProcessor.postProcessBeforeInitialization(bean, applicationContext));
+        invokeInit(bean);
+        beanPostProcessors.forEach(beanPostProcessor -> beanPostProcessor.postProcessAfterInitialization(bean, applicationContext));
     }
 
     @SneakyThrows
-    private <T> void invokeInit(T object) {
-        for (Method declaredMethod : object.getClass().getDeclaredMethods()) {
+    private <T> void invokeInit(T bean) {
+        for (Method declaredMethod : bean.getClass().getDeclaredMethods()) {
             if (declaredMethod.isAnnotationPresent(PostConstruct.class)) {
-                declaredMethod.invoke(object);
+                declaredMethod.invoke(bean);
             }
         }
     }
 
-    private <T> T wrapWithProxy(Class<T> implClass, T object) {
+    private <T> T wrapWithProxy(T bean, Class<T> implClass) {
+        T lastProxy = bean;
         for (ProxyProcessor proxyProcessor : proxyProcessors) {
-            object = (T) proxyProcessor.replaceWithProxy(object, implClass);
+            lastProxy = (T) proxyProcessor.replaceWithProxy(lastProxy, implClass);
         }
-        return object;
+        return lastProxy;
     }
 
 }

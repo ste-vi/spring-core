@@ -8,18 +8,22 @@ import stevi.spring.core.anotations.Configuration;
 import stevi.spring.core.anotations.Lazy;
 import stevi.spring.core.anotations.Service;
 import stevi.spring.core.config.Config;
+import stevi.spring.core.context.util.BeanNameUtils;
 import stevi.spring.core.env.Environment;
-import stevi.spring.core.factory.ObjectFactory;
+import stevi.spring.core.factory.BeanFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Implementation of {@link ApplicationContext}
+ */
 public class AutowiredApplicationContext implements ApplicationContext {
 
     @Setter
-    private ObjectFactory objectFactory;
+    private BeanFactory beanFactory;
 
     @Getter
     private final Config config;
@@ -30,18 +34,17 @@ public class AutowiredApplicationContext implements ApplicationContext {
         this.config = config;
     }
 
+    /**
+     * Inits method for configuring application context.
+     */
     @Override
     public void postInit() {
+        createApplicationEnvironment();
+        createConfigurationBeans();
         createEagerBeans();
     }
 
-    private void createEagerBeans() {
-        configureApplicationEnvironment();
-        createConfigurationBeans();
-        createComponentBeans();
-    }
-
-    private void configureApplicationEnvironment() {
+    private void createApplicationEnvironment() {
         getBean(Environment.class);
     }
 
@@ -64,7 +67,7 @@ public class AutowiredApplicationContext implements ApplicationContext {
                 });
     }
 
-    private void createComponentBeans() {
+    private void createEagerBeans() {
         Set<Class<?>> annotatedClasses = config.getReflectionsScanner().getTypesAnnotatedWith(Component.class);
         annotatedClasses.addAll(config.getReflectionsScanner().getTypesAnnotatedWith(Service.class));
         annotatedClasses.stream()
@@ -72,6 +75,10 @@ public class AutowiredApplicationContext implements ApplicationContext {
                 .forEach(this::getBean);
     }
 
+    /**
+     * Fetches bean from cache by a bean name.
+     * Throws exception if nothing is found;
+     */
     @Override
     public <T> T getBeanByName(String beanName) {
         if (cache.containsKey(beanName)) {
@@ -81,21 +88,27 @@ public class AutowiredApplicationContext implements ApplicationContext {
         }
     }
 
+    /**
+     * Fetches bean from cache.
+     * Created new bean and sets into cache of not found.
+     *
+     * @param aClass class to get bean based on
+     */
     @Override
     public <T> T getBean(Class<T> aClass) {
-        String beanName = getBeanNameFromClass(aClass);
+        String beanName = BeanNameUtils.getBeanNameFromClass(aClass);
         if (cache.containsKey(beanName)) {
             return (T) cache.get(beanName);
         }
 
-        Class<? extends T> implClass = getImplementationClassIfNeeded(aClass);
-        T object = objectFactory.createObject(implClass);
+        Class<? extends T> implClass = getImplementationClass(aClass);
+        T object = beanFactory.createBean(implClass);
         putObjectIntoCache(aClass, implClass, object);
 
         return object;
     }
 
-    private <T> Class<? extends T> getImplementationClassIfNeeded(Class<T> aClass) {
+    private <T> Class<? extends T> getImplementationClass(Class<T> aClass) {
         Class<? extends T> implClass = aClass;
         if (implClass.isInterface()) {
             implClass = config.getImplementation(aClass);
@@ -107,14 +120,5 @@ public class AutowiredApplicationContext implements ApplicationContext {
         if (implClass.isAnnotationPresent(Component.class) || implClass.isAnnotationPresent(Service.class)) {
             cache.put(aClass.getSimpleName(), object);
         }
-    }
-
-    private <T> String getBeanNameFromClass(Class<T> aClass) {
-        String classSimpleName = aClass.getSimpleName();
-        return formatBeanName(classSimpleName);
-    }
-
-    private String formatBeanName(String beanName) {
-        return beanName.substring(0, 1).toLowerCase() + beanName.substring(1);
     }
 }

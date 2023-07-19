@@ -15,9 +15,18 @@ import java.util.Objects;
 
 import static java.util.stream.Collectors.toMap;
 
+/**
+ * Utils class to resolve application properties.
+ */
 @Slf4j
 public final class PropertyUtils {
 
+    /**
+     * Reads properties from the given file name and creates a map.
+     *
+     * @param fileName example application.properties
+     * @return map of strings with key as left side before `=` and a value as right side. Both strings are trimmed.
+     */
     public static Map<String, String> fetchProperties(String fileName) {
         try {
             URI uri = Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResource(fileName)).toURI();

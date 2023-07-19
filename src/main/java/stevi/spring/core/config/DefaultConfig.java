@@ -1,6 +1,5 @@
 package stevi.spring.core.config;
 
-import lombok.Getter;
 import org.reflections.Reflections;
 import stevi.spring.core.anotations.Primary;
 
@@ -8,9 +7,14 @@ import java.lang.annotation.Annotation;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Default implementation of {@link Config} interface.
+ * Defines methods for looking up for bean implementations of interfaces.
+ * Can find implementations annotated {@link stevi.spring.core.anotations.Primary} annotation.
+ * Can find implementations by class names.
+ */
 public class DefaultConfig implements Config {
 
-    @Getter
     private final Reflections reflectionsScanner;
 
     public DefaultConfig(String basePackage) {
@@ -19,7 +23,7 @@ public class DefaultConfig implements Config {
 
     /**
      * Gets an implementations of an interface.
-     * It there is more than one implementation we use the one annotated with {@link stevi.spring.core.anotations.Primary} annotation
+     * It there is more than one implementation we use the one annotated with {@link stevi.spring.core.anotations.Primary} annotation.
      */
     @Override
     public <T> Class<? extends T> getImplementation(Class<T> interfaceType) {
@@ -66,5 +70,13 @@ public class DefaultConfig implements Config {
                 .filter(implementation -> implementation.getSimpleName().equals(beanName))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("No bean find with the qualified name %s".formatted(beanName)));
+    }
+
+    /**
+     * Returns reflection scanner which might be needed to find some classes elsewhere in the code.
+     */
+    @Override
+    public Reflections getReflectionsScanner() {
+        return reflectionsScanner;
     }
 }

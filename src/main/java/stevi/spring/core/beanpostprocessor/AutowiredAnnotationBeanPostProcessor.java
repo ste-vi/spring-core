@@ -7,27 +7,30 @@ import stevi.spring.core.context.ApplicationContext;
 
 import java.lang.reflect.Field;
 
+/**
+ * BeanPostProcessor for enabling field injection of beans into other beans.
+ */
 public class AutowiredAnnotationBeanPostProcessor implements BeanPostProcessor {
 
+    /**
+     * Checks for {@link Autowired} annotation of declared field of the given bean. <br>
+     * Gets a field type bean from {@link ApplicationContext} and assign value to it.
+     * <br>
+     * if {@link Qualifier} annotation is present, injects concrete class by provided name.
+     */
     @SneakyThrows
     @Override
-    public void postProcessBeforeInitialization(Object object, ApplicationContext applicationContext) {
-        for (var declaredField : object.getClass().getDeclaredFields()) {
+    public void postProcessBeforeInitialization(Object bean, ApplicationContext applicationContext) {
+        for (var declaredField : bean.getClass().getDeclaredFields()) {
             if (declaredField.isAnnotationPresent(Autowired.class)) {
                 Class<?> type = declaredField.getType();
-
                 type = getQualifiedImplementationIfNeeded(applicationContext, declaredField, type);
+                Object autowiredBean = applicationContext.getBean(type);
 
-                Object autowiredObject = applicationContext.getBean(type);
                 declaredField.setAccessible(true);
-                declaredField.set(object, autowiredObject);
+                declaredField.set(bean, autowiredBean);
             }
         }
-    }
-
-    @Override
-    public void postProcessAfterInitialization(Object object, ApplicationContext applicationContext) {
-
     }
 
     private Class<?> getQualifiedImplementationIfNeeded(ApplicationContext applicationContext, Field declaredField, Class<?> type) {
@@ -36,5 +39,10 @@ public class AutowiredAnnotationBeanPostProcessor implements BeanPostProcessor {
             type = applicationContext.getConfig().getImplementationByBeanName(type, beanName);
         }
         return type;
+    }
+
+    @Override
+    public void postProcessAfterInitialization(Object bean, ApplicationContext applicationContext) {
+
     }
 }
