@@ -1,7 +1,7 @@
 package stevi.spring.core.beanpostprocessor;
 
 import lombok.SneakyThrows;
-import stevi.spring.core.anotations.Value;
+import stevi.spring.core.anotation.Value;
 import stevi.spring.core.context.ApplicationContext;
 import stevi.spring.core.env.Environment;
 

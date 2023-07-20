@@ -1,9 +1,9 @@
 package stevi.spring.core.beanpostprocessor;
 
 import lombok.SneakyThrows;
-import stevi.spring.core.anotations.Autowired;
-import stevi.spring.core.anotations.Configuration;
-import stevi.spring.core.anotations.Qualifier;
+import stevi.spring.core.anotation.Autowired;
+import stevi.spring.core.anotation.Configuration;
+import stevi.spring.core.anotation.Qualifier;
 import stevi.spring.core.context.ApplicationContext;
 
 import java.lang.reflect.Field;

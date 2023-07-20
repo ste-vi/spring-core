@@ -1,4 +1,4 @@
-package stevi.spring.core.anotations;
+package stevi.spring.core.anotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -6,14 +6,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that the field should be initialized with value from the properties.
+ * This annotation may be used on a field or parameter as a qualifier for candidate beans when autowiring.
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Value {
+public @interface Qualifier {
 
     /**
-     * Provided default value if nothing is found in the properties.
+     * Qualified bean name to inject
      */
-    String value() default "";
+    String beanName() default "";
 }

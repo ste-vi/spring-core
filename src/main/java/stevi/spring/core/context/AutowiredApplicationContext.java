@@ -2,11 +2,11 @@ package stevi.spring.core.context;
 
 import lombok.Getter;
 import lombok.Setter;
-import stevi.spring.core.anotations.Bean;
-import stevi.spring.core.anotations.Component;
-import stevi.spring.core.anotations.Configuration;
-import stevi.spring.core.anotations.Lazy;
-import stevi.spring.core.anotations.Service;
+import stevi.spring.core.anotation.Bean;
+import stevi.spring.core.anotation.Component;
+import stevi.spring.core.anotation.Configuration;
+import stevi.spring.core.anotation.Lazy;
+import stevi.spring.core.anotation.Service;
 import stevi.spring.core.config.Config;
 import stevi.spring.core.env.ApplicationEnvironment;
 import stevi.spring.core.factory.BeanFactory;

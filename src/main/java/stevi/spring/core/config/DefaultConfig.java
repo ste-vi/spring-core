@@ -1,7 +1,7 @@
 package stevi.spring.core.config;
 
 import org.reflections.Reflections;
-import stevi.spring.core.anotations.Primary;
+import stevi.spring.core.anotation.Primary;
 
 import java.lang.annotation.Annotation;
 import java.util.Set;
@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 /**
  * Default implementation of {@link Config} interface.
  * Defines methods for looking up for bean implementations of interfaces.
- * Can find implementations annotated {@link stevi.spring.core.anotations.Primary} annotation.
+ * Can find implementations annotated {@link stevi.spring.core.anotation.Primary} annotation.
  * Can find implementations by class names.
  */
 public class DefaultConfig implements Config {
@@ -23,7 +23,7 @@ public class DefaultConfig implements Config {
 
     /**
      * Gets an implementations of an interface.
-     * It there is more than one implementation we use the one annotated with {@link stevi.spring.core.anotations.Primary} annotation.
+     * It there is more than one implementation we use the one annotated with {@link stevi.spring.core.anotation.Primary} annotation.
      */
     @Override
     public <T> Class<? extends T> getImplementation(Class<T> interfaceType) {
@@ -58,7 +58,7 @@ public class DefaultConfig implements Config {
 
     /**
      * Gets an implementations of an interface by a simple class name.
-     * Used for {{@link stevi.spring.core.anotations.Qualifier annotation}}
+     * Used for {{@link stevi.spring.core.anotation.Qualifier annotation}}
      */
     @Override
     public <T> Class<? extends T> getImplementationByBeanName(Class<T> interfaceType, String beanName) {

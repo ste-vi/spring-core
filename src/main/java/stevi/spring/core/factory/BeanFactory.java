@@ -2,7 +2,7 @@ package stevi.spring.core.factory;
 
 import lombok.SneakyThrows;
 import org.reflections.Reflections;
-import stevi.spring.core.anotations.PostConstruct;
+import stevi.spring.core.anotation.PostConstruct;
 import stevi.spring.core.beanpostprocessor.BeanPostProcessor;
 import stevi.spring.core.context.ApplicationContext;
 import stevi.spring.core.proxy.ProxyProcessor;

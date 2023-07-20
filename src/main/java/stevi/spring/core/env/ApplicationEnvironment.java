@@ -1,7 +1,7 @@
 package stevi.spring.core.env;
 
 import lombok.extern.slf4j.Slf4j;
-import stevi.spring.core.anotations.Component;
+import stevi.spring.core.anotation.Component;
 import stevi.spring.core.env.util.PropertyUtils;
 
 import java.util.HashMap;

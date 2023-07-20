@@ -1,7 +1,7 @@
 package stevi.spring.core.proxy;
 
-import stevi.spring.core.anotations.Async;
-import stevi.spring.core.anotations.Configuration;
+import stevi.spring.core.anotation.Async;
+import stevi.spring.core.anotation.Configuration;
 import stevi.spring.core.context.Application;
 import stevi.spring.core.proxy.util.ProxyUtils;
 

@@ -15,13 +15,13 @@ public interface BeanPostProcessor {
 
     /**
      * Apply this {@code BeanPostProcessor} to the given new bean instance <i>before</i> any bean
-     * initialization callbacks (like custom init-method via {@link stevi.spring.core.anotations.PostConstruct}).
+     * initialization callbacks (like custom init-method via {@link stevi.spring.core.anotation.PostConstruct}).
      */
     void postProcessBeforeInitialization(Object bean, ApplicationContext applicationContext);
 
     /**
      * Apply this {@code BeanPostProcessor} to the given new bean instance <i>after</i> any bean
-     * initialization callbacks (like custom init-method via {@link stevi.spring.core.anotations.PostConstruct}).
+     * initialization callbacks (like custom init-method via {@link stevi.spring.core.anotation.PostConstruct}).
      */
     void postProcessAfterInitialization(Object bean, ApplicationContext applicationContext);
 }
