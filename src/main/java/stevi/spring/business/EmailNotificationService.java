@@ -1,28 +1,24 @@
 package stevi.spring.business;
 
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import stevi.spring.core.anotations.Async;
-import stevi.spring.core.anotations.Autowired;
-import stevi.spring.core.anotations.PostConstruct;
-import stevi.spring.core.anotations.Service;
 
 @Slf4j
-@Service
+@NoArgsConstructor
 public class EmailNotificationService {
 
-    @Autowired
-    private BeanToCheckViaBeanAnnotation beanToCheckViaBeanAnnotation;
+    private String currency;
 
-    @PostConstruct
-    public void init() {
-        System.out.println(this.getClass());
+    public EmailNotificationService(String currency) {
+        this.currency = currency;
     }
 
     @Async
-    public void notifyUser(Long userId, String message) {
+    public void notifyUser(String message) {
+        //log.info(this.getClass().toString());
         log.info(Thread.currentThread().getName());
-        System.out.printf("New notification is here for userId %s : %s%n", userId, message);
-        beanToCheckViaBeanAnnotation.testAsyncFromAnotherAsync();
+        log.warn("New notification for you about {} => {}", currency, message);
     }
 
 }

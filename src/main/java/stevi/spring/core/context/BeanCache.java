@@ -38,9 +38,13 @@ public class BeanCache {
     /**
      * Puts a bean into cache. Key - is bean class name starts from lower case.
      */
-    public void put(Object bean) {
-        String beanName = BeanNameUtils.getBeanNameFromClass(bean.getClass());
+    public void put(Class<?> classImpl, Object bean) {
+        String beanName = BeanNameUtils.getBeanNameFromClass(classImpl);
         cache.put(beanName, bean);
+
+        if(cache.size() == 7) {
+            cache.size();
+        }
     }
 
     public void put(String beanName, Object bean) {

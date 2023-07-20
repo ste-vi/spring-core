@@ -7,13 +7,13 @@ import stevi.spring.core.anotations.Value;
 
 @Slf4j
 @Configuration
-public class Config {
+public class AppConfig {
 
     @Value
-    private String configProperty;
+    private String currency;
 
     @Bean
-    public BeanToCheckViaBeanAnnotation beanToCheckViaBeanAnnotation() {
-        return new BeanToCheckViaBeanAnnotation("@Configuration and @Bean works! %s".formatted(configProperty));
+    public EmailNotificationService emailNotificationService() {
+        return new EmailNotificationService(currency);
     }
 }

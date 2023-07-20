@@ -9,7 +9,6 @@ import stevi.spring.core.anotations.Lazy;
 import stevi.spring.core.anotations.Service;
 import stevi.spring.core.config.Config;
 import stevi.spring.core.env.ApplicationEnvironment;
-import stevi.spring.core.env.Environment;
 import stevi.spring.core.factory.BeanFactory;
 
 import java.lang.reflect.InvocationTargetException;
@@ -45,19 +44,20 @@ public class AutowiredApplicationContext implements ApplicationContext {
 
     private void createApplicationEnvironment() {
         ApplicationEnvironment environment = new ApplicationEnvironment();
-        beanCache.put(environment);
+        beanCache.put(environment.getClass(), environment);
     }
 
     private void createConfigurationBeans() {
         Set<Class<?>> classesAnnotatedWithConfiguration = config.getReflectionsScanner().getTypesAnnotatedWith(Configuration.class);
         classesAnnotatedWithConfiguration.stream()
                 .filter(configClass -> !configClass.isInterface())
-                .map(this::getBean)
-                .forEach(configBean -> {
-                    for (var declaredMethod : configBean.getClass().getDeclaredMethods()) {
+                .forEach(configClass -> {
+                    Object configBean = getBean(configClass);
+                    for (var declaredMethod : configClass.getDeclaredMethods()) {
                         if (declaredMethod.isAnnotationPresent(Bean.class)) {
                             try {
                                 Object createdBean = declaredMethod.invoke(configBean);
+                                createdBean = beanFactory.postInitializeBean(createdBean, createdBean.getClass());
                                 beanCache.put(declaredMethod.getName(), createdBean);
                             } catch (IllegalAccessException | InvocationTargetException e) {
                                 throw new RuntimeException(e);
@@ -101,10 +101,10 @@ public class AutowiredApplicationContext implements ApplicationContext {
             return (T) beanCache.get(implClass);
         }
 
-        T object = beanFactory.createBean(implClass);
-        putObjectIntoCache(implClass, object);
+        T bean = beanFactory.createBean(implClass);
+        putObjectIntoCache(implClass, bean);
 
-        return object;
+        return bean;
     }
 
     private <T> Class<? extends T> getImplementationClass(Class<T> aClass) {
@@ -117,7 +117,7 @@ public class AutowiredApplicationContext implements ApplicationContext {
 
     private <T> void putObjectIntoCache(Class<? extends T> implClass, T object) {
         if (implClass.isAnnotationPresent(Component.class) || implClass.isAnnotationPresent(Service.class)) {
-            beanCache.put(object);
+            beanCache.put(implClass, object);
         }
     }
 }

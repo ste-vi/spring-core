@@ -41,7 +41,7 @@ public class BeanFactory {
     }
 
     /**
-     * Creates bean based on given class.
+     * Creates bean based on given class and configures it.
      *
      * @return ready bean object
      */
@@ -50,7 +50,6 @@ public class BeanFactory {
         T bean = create(implClass);
         configure(bean);
         bean = wrapWithProxy(bean, implClass);
-
         return bean;
     }
 
@@ -102,6 +101,20 @@ public class BeanFactory {
         T lastProxy = bean;
         for (ProxyProcessor proxyProcessor : proxyProcessors) {
             lastProxy = (T) proxyProcessor.replaceWithProxy(lastProxy, implClass);
+        }
+        return lastProxy;
+    }
+
+    public Object postInitializeBean(Object bean, Class<?> implClass) {
+        configure(bean);
+        bean = wrapBeanWithProxy(bean, implClass);
+        return bean;
+    }
+
+    private Object wrapBeanWithProxy(Object bean, Class<?> implClass) {
+        Object lastProxy = bean;
+        for (ProxyProcessor proxyProcessor : proxyProcessors) {
+            lastProxy = proxyProcessor.replaceWithProxy(lastProxy, implClass);
         }
         return lastProxy;
     }

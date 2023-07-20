@@ -2,6 +2,7 @@ package stevi.spring.core.beanpostprocessor;
 
 import lombok.SneakyThrows;
 import stevi.spring.core.anotations.Autowired;
+import stevi.spring.core.anotations.Configuration;
 import stevi.spring.core.anotations.Qualifier;
 import stevi.spring.core.context.ApplicationContext;
 
@@ -21,14 +22,17 @@ public class AutowiredAnnotationBeanPostProcessor implements BeanPostProcessor {
     @SneakyThrows
     @Override
     public void postProcessBeforeInitialization(Object bean, ApplicationContext applicationContext) {
-        for (var declaredField : bean.getClass().getDeclaredFields()) {
-            if (declaredField.isAnnotationPresent(Autowired.class)) {
-                Class<?> type = declaredField.getType();
-                type = getQualifiedImplementationIfNeeded(applicationContext, declaredField, type);
-                Object autowiredBean = applicationContext.getBean(type);
+        if (!bean.getClass().isAnnotationPresent(Configuration.class)) {
+            for (var declaredField : bean.getClass().getDeclaredFields()) {
+                if (declaredField.isAnnotationPresent(Autowired.class)) {
+                    Class<?> type = declaredField.getType();
 
-                declaredField.setAccessible(true);
-                declaredField.set(bean, autowiredBean);
+                    type = getQualifiedImplementationIfNeeded(applicationContext, declaredField, type);
+                    Object autowiredBean = applicationContext.getBean(type);
+
+                    declaredField.setAccessible(true);
+                    declaredField.set(bean, autowiredBean);
+                }
             }
         }
     }

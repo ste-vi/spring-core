@@ -1,10 +1,15 @@
 package stevi.spring.core.proxy;
 
 import stevi.spring.core.anotations.Async;
+import stevi.spring.core.anotations.Configuration;
+import stevi.spring.core.context.Application;
 import stevi.spring.core.proxy.util.ProxyUtils;
 
 import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 import java.util.function.Function;
 
 /**
@@ -15,36 +20,47 @@ public class AsyncProxyProcessor implements ProxyProcessor {
 
     @Override
     public Object replaceWithProxy(Object realObject, Class<?> implClass) {
-        for (var declaredMethod : implClass.getDeclaredMethods()) {
-            if (declaredMethod.isAnnotationPresent(Async.class)) {
-                Function<Object, InvocationHandler> invocationHandlerFunction = Object -> createInvocationHandler(realObject);
-                return ProxyUtils.createProxy(realObject, implClass, invocationHandlerFunction, declaredMethod.getName());
-            } else {
-                return realObject;
-            }
+        if (!implClass.isAnnotationPresent(Configuration.class)) {
+            Function<Object, InvocationHandler> invocationHandlerFunction = object -> createInvocationHandler(realObject);
+            return ProxyUtils.createProxy(realObject, implClass, invocationHandlerFunction);
         }
         return realObject;
     }
 
-
     private InvocationHandler createInvocationHandler(Object object) {
         return (proxy, method, args) -> {
+            if (method.isAnnotationPresent(Async.class)) {
+                Callable<Object> task = prepareCallableTask(object, method, args);
+                return doSubmit(method, task);
+            } else {
+                return method.invoke(object, args);
+            }
+        };
+    }
 
-            Runnable task = () -> {
-                try {
-                    System.out.println("BEFORE");
-                    method.invoke(object, args);
-                    System.out.println("AFTER");
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    throw new RuntimeException(e);
+    private Callable<Object> prepareCallableTask(Object object, Method method, Object[] args) {
+        return () -> {
+            try {
+                Object result = method.invoke(object, args);
+                if (result instanceof Future<?> future) {
+                    return future.get();
                 }
-            };
-
-            Thread thread = new Thread(task);
-            thread.start();
-
-            // return Application.applicationFixedExecutorService.submit(task);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
             return null;
         };
+    }
+
+    private Future<Object> doSubmit(Method method, Callable<Object> task) {
+        Class<?> returnType = method.getReturnType();
+        if (CompletableFuture.class.isAssignableFrom(returnType) || Future.class.isAssignableFrom(returnType)) {
+            return Application.applicationFixedExecutorService.submit(task);
+        } else if (void.class == returnType) {
+            Application.applicationFixedExecutorService.submit(task);
+            return null;
+        } else {
+            throw new IllegalArgumentException("Invalid return type for async method (only Future and void supported): " + returnType);
+        }
     }
 }

@@ -5,6 +5,7 @@ import stevi.spring.core.config.DefaultConfig;
 import stevi.spring.core.factory.BeanFactory;
 
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Class which starts an application.
@@ -15,7 +16,8 @@ public class Application {
     public static ExecutorService applicationFixedExecutorService;
 
     /**
-     * Starts an application.a
+     * Starts the application.
+     * Scans for classes.
      *
      * @param packageToScan base package to scan beans.
      * @return {@link ApplicationContext}
@@ -27,8 +29,15 @@ public class Application {
         applicationContext.setBeanFactory(beanFactory);
         applicationContext.postInit();
 
-        //applicationFixedExecutorService = Executors.newFixedThreadPool(10);
+        applicationFixedExecutorService = Executors.newFixedThreadPool(10);
 
         return applicationContext;
+    }
+
+    /**
+     * Stops the application. Clears resources.
+     */
+    public static void stop() {
+        applicationFixedExecutorService.shutdown();
     }
 }

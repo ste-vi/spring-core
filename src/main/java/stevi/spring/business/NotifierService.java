@@ -1,9 +1,9 @@
 package stevi.spring.business;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import stevi.spring.core.anotations.Autowired;
 import stevi.spring.core.anotations.Service;
-import stevi.spring.core.env.Environment;
 
 @Slf4j
 @Service
@@ -13,21 +13,12 @@ public class NotifierService {
     private ExchangeApi exchangeApi;
 
     @Autowired
-    private BeanToCheckViaBeanAnnotation beanToCheckViaBeanAnnotation;
+    private EmailNotificationService emailNotificationService;
 
-    @Autowired
-    private Environment environment;
-
-    private final EmailNotificationService emailNotificationService;
-
-    public NotifierService(EmailNotificationService emailNotificationService) {
-        this.emailNotificationService = emailNotificationService;
-    }
-
+    @SneakyThrows
     public void sendExchangeNotification() {
         log.info(Thread.currentThread().getName());
-        Double currentRate = exchangeApi.getCurrentRate();
-        emailNotificationService.notifyUser(1L, "Hey bro! here is the exchange rate for today: %s UA grivna per US dollar".formatted(currentRate));
-        beanToCheckViaBeanAnnotation.someMethod();
+        exchangeApi.getCurrentRate().get();
+        emailNotificationService.notifyUser("Hey bro! here is the exchange rate for today: %s".formatted("null"));
     }
 }

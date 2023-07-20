@@ -12,5 +12,7 @@ public class Main {
 
         NotifierService notifierService = applicationContext.getBean(NotifierService.class);
         notifierService.sendExchangeNotification();
+
+        Application.stop();
     }
 }
