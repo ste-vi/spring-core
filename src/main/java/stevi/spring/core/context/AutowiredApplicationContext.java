@@ -102,7 +102,7 @@ public class AutowiredApplicationContext implements ApplicationContext {
         }
 
         T bean = beanFactory.createBean(implClass);
-        putObjectIntoCache(implClass, bean);
+        putBeanIntoCache(implClass, bean);
 
         return bean;
     }
@@ -115,7 +115,7 @@ public class AutowiredApplicationContext implements ApplicationContext {
         return implClass;
     }
 
-    private <T> void putObjectIntoCache(Class<? extends T> implClass, T object) {
+    private <T> void putBeanIntoCache(Class<? extends T> implClass, T object) {
         if (implClass.isAnnotationPresent(Component.class) || implClass.isAnnotationPresent(Service.class)) {
             beanCache.put(implClass, object);
         }

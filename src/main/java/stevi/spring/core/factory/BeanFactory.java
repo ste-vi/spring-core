@@ -60,7 +60,6 @@ public class BeanFactory {
                 .findFirst()
                 .map(constructor -> instantiateConstructorWithParameters(implClass, constructor))
                 .orElseGet(() -> instantiateDefaultConstructor(implClass));
-
     }
 
     @SneakyThrows
