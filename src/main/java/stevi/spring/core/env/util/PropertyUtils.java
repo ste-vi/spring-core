@@ -36,7 +36,7 @@ public final class PropertyUtils {
                     .filter(line -> !line.isBlank())
                     .map(line -> line.trim().split("="))
                     .collect(toMap(array -> array[0].trim(), array -> array[1].trim()));
-        } catch (URISyntaxException exception) {
+        } catch (NullPointerException | URISyntaxException exception) {
             log.warn("No property file is found with file name: {}. Please create the file in resources, or else no properties will be fetched", fileName);
             return new HashMap<>();
         } catch (IOException e) {
