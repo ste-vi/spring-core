@@ -2,6 +2,7 @@ package stevi.spring.core.context;
 
 import stevi.spring.core.context.util.BeanNameUtils;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -41,13 +42,13 @@ public class BeanCache {
     public void put(Class<?> classImpl, Object bean) {
         String beanName = BeanNameUtils.getBeanNameFromClass(classImpl);
         cache.put(beanName, bean);
-
-        if(cache.size() == 7) {
-            cache.size();
-        }
     }
 
     public void put(String beanName, Object bean) {
         cache.put(beanName, bean);
+    }
+
+    public List<Object> getValues() {
+        return cache.values().stream().toList();
     }
 }

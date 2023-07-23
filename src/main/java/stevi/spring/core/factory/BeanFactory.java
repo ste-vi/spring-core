@@ -54,6 +54,13 @@ public class BeanFactory {
     }
 
     @SneakyThrows
+    public <T> T createBeanWithoutProxy(Class<T> implClass) {
+        T bean = create(implClass);
+        configure(bean);
+        return bean;
+    }
+
+    @SneakyThrows
     private <T> T create(Class<T> implClass) {
         return Arrays.stream(implClass.getDeclaredConstructors())
                 .filter(constructor -> constructor.getParameterCount() > 0)
